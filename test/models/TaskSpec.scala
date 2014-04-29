@@ -24,5 +24,21 @@ class TaskSpec extends Specification {
       Task.create("a label")
       Task.all().last.created must not beNull
     }
+
+    "have a None finished date after creation" in new WithApplication {
+      Task.all().length must beEqualTo(0)
+      Task.create("a label")
+      Task.all().last.finished must beNone
+    }
+  }
+
+  "Task#finish" should {
+    "make finished not null" in new WithApplication {
+      Task.create("a label")
+      val task = Task.all().last
+      task.finished must beNone
+      Task.finish(task.id)
+      Task.all().last.finished must beSome
+    }
   }
 }
