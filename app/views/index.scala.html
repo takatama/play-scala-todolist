@@ -4,7 +4,7 @@
 
 @main("Todo list") {
 
-    <h1>@tasks.size task(s)</h1>
+    <h1>@Messages("task.number", tasks.size)</h1>
 
     <ul>
         @tasks.map { task =>
@@ -17,7 +17,7 @@
         }
     </ul>
 
-    <h2>Add a new task</h2>
+    <h2>@Messages("task.add")</h2>
 
     @form(routes.Application.newTask) {
 	@inputText(taskForm("label"))
