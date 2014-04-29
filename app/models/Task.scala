@@ -2,7 +2,7 @@ package models
 
 import java.util.Date;
 
-case class Task(id: Long, label: String, created: Date)
+case class Task(id: Long, label: String, created: Date, finished: Option[Date])
 
 object Task {
 
@@ -12,8 +12,9 @@ object Task {
   val task = {
     get[Long]("id") ~
     get[String]("label") ~
-    get[Date]("created") map {
-      case id~label~created => Task(id, label, created)
+    get[Date]("created") ~
+    get[Option[Date]]("finished") map {
+      case id~label~created~finished => Task(id, label, created, finished)
     }
   }
 
@@ -38,6 +39,16 @@ object Task {
     DB.withConnection { implicit c =>
       SQL("delete from task where id = {id}").on(
         'id -> id
+      ).executeUpdate()
+    }
+  }
+
+  def finish(id: Long) {
+    val finished = new Date
+    DB.withConnection { implicit c =>
+      SQL("update task set finished = {finished} where id = {id}").on(
+        'finished -> finished,
+	'id -> id
       ).executeUpdate()
     }
   }
