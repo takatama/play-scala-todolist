@@ -41,4 +41,9 @@ object Application extends Controller {
     Redirect(routes.Application.tasks)
   }
 
+  def finishTask(id: Long) = Action {
+    Task.finish(id)
+    Redirect(routes.Application.tasks)
+  }
+
 }
