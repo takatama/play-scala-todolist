@@ -3,6 +3,8 @@ package controllers
 import play.api._
 import play.api.mvc._
 
+case class TaskData(label: String)
+
 object Application extends Controller {
 
   def index = Action {
@@ -13,9 +15,9 @@ object Application extends Controller {
   import play.api.data.Forms._
 
   val taskForm = Form(
-    single(
+    mapping(
         "label" -> nonEmptyText
-    )
+    )(TaskData.apply)(TaskData.unapply)
   )
 
   import models.Task
@@ -27,8 +29,8 @@ object Application extends Controller {
   def newTask = Action { implicit request =>
     taskForm.bindFromRequest.fold(
       errors => BadRequest(views.html.index(Task.all(), errors)),
-      label => {
-        Task.create(label)
+      taskData => {
+        Task.create(taskData.label)
 	Redirect(routes.Application.tasks)
       }
     )
