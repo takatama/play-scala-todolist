@@ -13,7 +13,9 @@ object Application extends Controller {
   import play.api.data.Forms._
 
   val taskForm = Form(
-    "label" -> nonEmptyText
+    single(
+        "label" -> nonEmptyText
+    )
   )
 
   import models.Task
