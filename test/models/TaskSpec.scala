@@ -12,11 +12,17 @@ class TaskSpec extends Specification {
 
   "Task" should {
 
-    "be with a label" in new WithApplication{
+    "have a label" in new WithApplication {
       Task.all().length must beEqualTo(0)
       val label = "the label"
       Task.create(label)
       Task.all().last.label must beEqualTo(label)
+    }
+    
+    "have a created date" in new WithApplication {
+      Task.all().length must beEqualTo(0)
+      Task.create("a label")
+      Task.all().last.created must not beNull
     }
   }
 }

@@ -1,6 +1,8 @@
 package models
 
-case class Task(id: Long, label: String)
+import java.util.Date;
+
+case class Task(id: Long, label: String, created: Date)
 
 object Task {
 
@@ -9,8 +11,9 @@ object Task {
 
   val task = {
     get[Long]("id") ~
-    get[String]("label") map {
-      case id~label => Task(id, label)
+    get[String]("label") ~
+    get[Date]("created") map {
+      case id~label~created => Task(id, label, created)
     }
   }
 
@@ -22,9 +25,11 @@ object Task {
   }
 
   def create(label: String) {
+    val created = new Date
     DB.withConnection { implicit c =>
-      SQL("insert into task (label) values ({label})").on(
-        'label -> label
+      SQL("insert into task (label, created) values ({label}, {created})").on(
+        'label -> label,
+	'created -> created
       ).executeUpdate()
     }
   }
