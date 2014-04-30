@@ -1,0 +1,28 @@
+@(projects: List[Project], projectForm: Form[ProjectData], user: securesocial.core.Identity)
+
+@import helper._
+
+@main("Projects") {
+    <img src="@user.avatarUrl"><p>@user.fullName (<a href="/logout">logout</a>)</p>
+
+    <h1>Projects</h1>
+
+    <ul>
+        @projects.map { project =>
+            <li>
+		@project.name
+                @form(routes.ProjectController.deleteProject(project.id)) {
+                    <input type="submit" value="Delete">
+                }
+            </li>
+        }
+    </ul>
+
+    <h2>Create a project</h2>
+
+    @form(routes.ProjectController.newProject) {
+        @inputText(projectForm("name"))
+        <input type="submit" value="Create">
+    }
+
+}
