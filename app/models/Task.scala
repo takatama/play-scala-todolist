@@ -1,27 +1,27 @@
 package models
 
+import anorm._
+import anorm.SqlParser._
+
+import play.api.db._
+import play.api.Play.current
+
 import java.util.Date;
 
-case class Task(id: Long, label: String, created: Date, finished: Option[Date], userId: String, deadline: Option[Date])
+case class Task(id: Long, label: String, created: Date, finished: Option[Date], userId: String, deadline: Option[Date], projectId: Option[Long])
 
 object Task {
-
-  import anorm._
-  import anorm.SqlParser._
-
   val task = {
     get[Long]("id") ~
     get[String]("label") ~
     get[Date]("created") ~
     get[Option[Date]]("finished") ~
     get[String]("user_id") ~
-    get[Option[Date]]("deadline") map {
-      case id~label~created~finished~userId~deadline => Task(id, label, created, finished, userId, deadline)
+    get[Option[Date]]("deadline") ~
+    get[Option[Long]]("project_id") map {
+      case id~label~created~finished~userId~deadline~projectId => Task(id, label, created, finished, userId, deadline, projectId)
     }
   }
-
-  import play.api.db._
-  import play.api.Play.current
 
   def all(userId: String): List[Task] = DB.withConnection { implicit c =>
     SQL("select * from task where user_id = {userId}").on(
@@ -29,14 +29,15 @@ object Task {
     ).as(task *)
   }
 
-  def create(userId: String, label: String, deadline: Option[Date] = None) {
+  def create(userId: String, label: String, deadline: Option[Date] = None, projectId: Option[Long] = None) {
     val created = new Date
     DB.withConnection { implicit c =>
-      SQL("insert into task (label, created, user_id, deadline) values ({label}, {created}, {userId}, {deadline})").on(
+      SQL("insert into task (label, created, user_id, deadline, project_id) values ({label}, {created}, {userId}, {deadline}, {projectId})").on(
         'label -> label,
 	'created -> created,
 	'userId -> userId,
-	'deadline -> deadline
+	'deadline -> deadline,
+	'projectId -> projectId
       ).executeUpdate()
     }
   }

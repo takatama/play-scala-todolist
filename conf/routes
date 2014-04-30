@@ -23,3 +23,7 @@ GET     /authenticate/:provider     securesocial.controllers.ProviderController.
 POST    /authenticate/:provider     securesocial.controllers.ProviderController.authenticateByPost(provider)
 GET     /non-authorized             securesocial.controllers.ProviderController.notAuthorized
 
+# Project pages
+GET     /projects                   controllers.ProjectController.projects
+POST    /projects                   controllers.ProjectController.newProject
+POST    /projects/:id/delete        controllers.ProjectController.deleteProject(id: Long)

@@ -1,4 +1,4 @@
-@(tasks: List[Task], taskForm: Form[TaskData], user: securesocial.core.Identity)
+@(tasks: List[Task], taskForm: Form[TaskData], user: securesocial.core.Identity, projects: Seq[(String, String)])
 
 @import helper._
 
@@ -32,6 +32,12 @@
     @form(routes.Application.newTask) {
         @inputText(taskForm("label"))
         @inputText(taskForm("deadline"))
+        @select(
+	    taskForm("projectId"),
+	    projects,
+	    '_label -> "Projects", '_default -> "--",
+	    '_showConstraints -> false
+        )
         <input type="submit" value="Create">
     }
 

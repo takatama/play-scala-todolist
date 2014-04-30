@@ -4,7 +4,7 @@ import play.api._
 import play.api.mvc._
 import java.util.Date
 
-case class TaskData(label: String, deadline: Option[Date])
+case class TaskData(label: String, deadline: Option[Date], projectId: Option[Long])
 
 object Application extends Controller with securesocial.core.SecureSocial {
 
@@ -18,24 +18,28 @@ object Application extends Controller with securesocial.core.SecureSocial {
   val taskForm = Form(
     mapping(
         "label" -> nonEmptyText,
-	"deadline" -> optional(date)
+	"deadline" -> optional(date),
+	"projectId" -> optional(longNumber)
     )(TaskData.apply)(TaskData.unapply)
   )
 
-  import models.Task
+  import models.{Task, Project}
 
-  def tasks = SecuredAction { implicit request =>
-    Ok(views.html.index(Task.all(request.user.identityId.userId), taskForm, request.user))
+  def tasks = SecuredAction { implicit request => {
+      val userId = request.user.identityId.userId
+      Ok(views.html.index(Task.all(userId), taskForm, request.user, Project.options(userId)))
+    }
   }
 
-  def newTask = SecuredAction { implicit request =>
+  def newTask = SecuredAction { implicit request => {
+    val userId = request.user.identityId.userId
     taskForm.bindFromRequest.fold(
-      errors => BadRequest(views.html.index(Task.all(request.user.identityId.userId), errors, request.user)),
+      errors => BadRequest(views.html.index(Task.all(userId), errors, request.user, Project.options(userId))),
       taskData => {
         Task.create(request.user.identityId.userId, taskData.label, taskData.deadline)
 	Redirect(routes.Application.tasks)
       }
-    )
+    )}
   }
 
   def deleteTask(id: Long) = SecuredAction { implicit request => {

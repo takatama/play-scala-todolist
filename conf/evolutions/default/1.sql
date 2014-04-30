@@ -9,7 +9,8 @@ CREATE TABLE task (
   created date,
   finished date,
   user_id varchar(255) NOT NULL,
-  deadline date
+  deadline date,
+  project_id integer
 );
 
 # --- !Downs
