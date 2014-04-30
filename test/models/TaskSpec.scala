@@ -13,32 +13,36 @@ class TaskSpec extends Specification {
   "Task" should {
 
     "have a label" in new WithApplication {
-      Task.all().length must beEqualTo(0)
+      val userId = "1"
+      Task.all(userId).length must beEqualTo(0)
       val label = "the label"
-      Task.create(label)
-      Task.all().last.label must beEqualTo(label)
+      Task.create(label, userId)
+      Task.all(userId).last.label must beEqualTo(label)
     }
     
     "have a created date" in new WithApplication {
-      Task.all().length must beEqualTo(0)
-      Task.create("a label")
-      Task.all().last.created must not beNull
+      val userId = "1"
+      Task.all(userId).length must beEqualTo(0)
+      Task.create("a label", userId)
+      Task.all(userId).last.created must not beNull
     }
 
     "have a None finished date after creation" in new WithApplication {
-      Task.all().length must beEqualTo(0)
-      Task.create("a label")
-      Task.all().last.finished must beNone
+      val userId = "1"
+      Task.all(userId).length must beEqualTo(0)
+      Task.create("a label", userId)
+      Task.all(userId).last.finished must beNone
     }
   }
 
   "Task#finish" should {
     "make finished not null" in new WithApplication {
-      Task.create("a label")
-      val task = Task.all().last
+      val userId = "1"
+      Task.create("a label", userId)
+      val task = Task.all(userId).last
       task.finished must beNone
-      Task.finish(task.id)
-      Task.all().last.finished must beSome
+      Task.finish(task.id, userId)
+      Task.all(userId).last.finished must beSome
     }
   }
 }
