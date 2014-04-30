@@ -22,28 +22,30 @@ object Application extends Controller with securesocial.core.SecureSocial {
 
   import models.Task
 
-  def tasks = SecuredAction {
-    Ok(views.html.index(Task.all(), taskForm))
+  def tasks = SecuredAction { implicit request =>
+    Ok(views.html.index(Task.all(request.user.identityId.userId), taskForm, request.user))
   }
 
   def newTask = SecuredAction { implicit request =>
     taskForm.bindFromRequest.fold(
-      errors => BadRequest(views.html.index(Task.all(), errors)),
+      errors => BadRequest(views.html.index(Task.all(request.user.identityId.userId), errors, request.user)),
       taskData => {
-        Task.create(taskData.label)
+        Task.create(taskData.label, request.user.identityId.userId)
 	Redirect(routes.Application.tasks)
       }
     )
   }
 
-  def deleteTask(id: Long) = SecuredAction {
-    Task.delete(id)
-    Redirect(routes.Application.tasks)
+  def deleteTask(id: Long) = SecuredAction { implicit request => {
+      Task.delete(id, request.user.identityId.userId)
+      Redirect(routes.Application.tasks)
+    }
   }
 
-  def finishTask(id: Long) = SecuredAction {
-    Task.finish(id)
-    Redirect(routes.Application.tasks)
+  def finishTask(id: Long) = SecuredAction { implicit request => {
+      Task.finish(id, request.user.identityId.userId)
+      Redirect(routes.Application.tasks)
+    }
   }
 
 }

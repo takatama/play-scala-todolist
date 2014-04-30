@@ -14,13 +14,12 @@
  * limitations under the License.
  *
  */
-package service
+package services
 
 import play.api.{Logger, Application}
 import securesocial.core._
 import securesocial.core.providers.Token
 import securesocial.core.IdentityId
-
 
 /**
  * A Sample In Memory user service in Scala
@@ -30,6 +29,7 @@ import securesocial.core.IdentityId
  */
 class InMemoryUserService(application: Application) extends UserServicePlugin(application) {
   val logger = Logger("application.controllers.InMemoryUserService")
+
   // a simple User class that can have multiple identities
   case class User(id: String, identities: List[Identity])
   
