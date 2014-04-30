@@ -5,7 +5,7 @@ import play.api.mvc._
 
 case class TaskData(label: String)
 
-object Application extends Controller {
+object Application extends Controller with securesocial.core.SecureSocial {
 
   def index = Action {
     Redirect(routes.Application.tasks)
@@ -22,11 +22,11 @@ object Application extends Controller {
 
   import models.Task
 
-  def tasks = Action {
+  def tasks = SecuredAction {
     Ok(views.html.index(Task.all(), taskForm))
   }
 
-  def newTask = Action { implicit request =>
+  def newTask = SecuredAction { implicit request =>
     taskForm.bindFromRequest.fold(
       errors => BadRequest(views.html.index(Task.all(), errors)),
       taskData => {
@@ -36,12 +36,12 @@ object Application extends Controller {
     )
   }
 
-  def deleteTask(id: Long) = Action {
+  def deleteTask(id: Long) = SecuredAction {
     Task.delete(id)
     Redirect(routes.Application.tasks)
   }
 
-  def finishTask(id: Long) = Action {
+  def finishTask(id: Long) = SecuredAction {
     Task.finish(id)
     Redirect(routes.Application.tasks)
   }
