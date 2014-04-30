@@ -8,7 +8,8 @@ CREATE TABLE task (
   label varchar(255),
   created date,
   finished date,
-  user_id varchar(255) NOT NULL
+  user_id varchar(255) NOT NULL,
+  deadline date
 );
 
 # --- !Downs

@@ -2,7 +2,7 @@ package models
 
 import java.util.Date;
 
-case class Task(id: Long, label: String, created: Date, finished: Option[Date], userId: String)
+case class Task(id: Long, label: String, created: Date, finished: Option[Date], userId: String, deadline: Option[Date])
 
 object Task {
 
@@ -14,8 +14,9 @@ object Task {
     get[String]("label") ~
     get[Date]("created") ~
     get[Option[Date]]("finished") ~
-    get[String]("user_id") map {
-      case id~label~created~finished~userId => Task(id, label, created, finished, userId)
+    get[String]("user_id") ~
+    get[Option[Date]]("deadline") map {
+      case id~label~created~finished~userId~deadline => Task(id, label, created, finished, userId, deadline)
     }
   }
 
@@ -28,18 +29,19 @@ object Task {
     ).as(task *)
   }
 
-  def create(label: String, userId: String) {
+  def create(userId: String, label: String, deadline: Option[Date] = None) {
     val created = new Date
     DB.withConnection { implicit c =>
-      SQL("insert into task (label, created, user_id) values ({label}, {created}, {userId})").on(
+      SQL("insert into task (label, created, user_id, deadline) values ({label}, {created}, {userId}, {deadline})").on(
         'label -> label,
 	'created -> created,
-	'userId -> userId
+	'userId -> userId,
+	'deadline -> deadline
       ).executeUpdate()
     }
   }
 
-  def delete(id: Long, userId: String) {
+  def delete(userId: String, id: Long) {
     DB.withConnection { implicit c =>
       SQL("delete from task where id = {id} and user_id = {userId}").on(
         'id -> id,
@@ -48,7 +50,7 @@ object Task {
     }
   }
 
-  def finish(id: Long, userId: String) {
+  def finish(userId: String, id: Long) {
     val finished = new Date
     DB.withConnection { implicit c =>
       SQL("update task set finished = {finished} where id = {id} and user_id = {userId}").on(

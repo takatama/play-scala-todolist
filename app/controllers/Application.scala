@@ -2,8 +2,9 @@ package controllers
 
 import play.api._
 import play.api.mvc._
+import java.util.Date
 
-case class TaskData(label: String)
+case class TaskData(label: String, deadline: Option[Date])
 
 object Application extends Controller with securesocial.core.SecureSocial {
 
@@ -16,7 +17,8 @@ object Application extends Controller with securesocial.core.SecureSocial {
 
   val taskForm = Form(
     mapping(
-        "label" -> nonEmptyText
+        "label" -> nonEmptyText,
+	"deadline" -> optional(date)
     )(TaskData.apply)(TaskData.unapply)
   )
 
@@ -30,20 +32,20 @@ object Application extends Controller with securesocial.core.SecureSocial {
     taskForm.bindFromRequest.fold(
       errors => BadRequest(views.html.index(Task.all(request.user.identityId.userId), errors, request.user)),
       taskData => {
-        Task.create(taskData.label, request.user.identityId.userId)
+        Task.create(request.user.identityId.userId, taskData.label, taskData.deadline)
 	Redirect(routes.Application.tasks)
       }
     )
   }
 
   def deleteTask(id: Long) = SecuredAction { implicit request => {
-      Task.delete(id, request.user.identityId.userId)
+      Task.delete(request.user.identityId.userId, id)
       Redirect(routes.Application.tasks)
     }
   }
 
   def finishTask(id: Long) = SecuredAction { implicit request => {
-      Task.finish(id, request.user.identityId.userId)
+      Task.finish(request.user.identityId.userId, id)
       Redirect(routes.Application.tasks)
     }
   }
