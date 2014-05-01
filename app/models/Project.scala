@@ -23,12 +23,24 @@ object Project {
     ).as(project *)
   }
 
-  def create(userId: String, name: String) {
-    DB.withConnection { implicit c =>
-      SQL("insert into projects (name, user_id) values ({name}, {userId})").on(
+  def create(userId: String, name: String): Project = {
+    DB.withTransaction { implicit connection =>
+      val projectId: Long = {
+        SQL("select next value for project_id_seq").as(scalar[Long].single)
+      }
+      
+      SQL("insert into projects (id, name, user_id) values ({projectId}, {name}, {userId})").on(
+        "projectId" -> projectId,
         'name -> name,
 	'userId -> userId
       ).executeUpdate()
+      
+      SQL("insert into project_member (project_id, user_id) values ({projectId}, {userId})").on(
+        "projectId" -> projectId,
+	"userId" -> userId
+      ).executeUpdate()
+      
+      Project(projectId, name, userId)
     }
   }
 
@@ -46,4 +58,41 @@ object Project {
       'userId -> userId
     ).as(Project.project *).map(c => c.id.toString -> c.name)
   }
+
+  def isMember(userId: String, projectId: Long): Boolean = {
+    DB.withConnection { implicit connection =>
+      SQL(
+        """
+	  select count(project_member.project_id) = 1 from project_member
+	  where project_member.user_id = {userId} and project_member.project_id = {projectId}
+	"""
+      ).on(
+	"userId" -> userId,
+        "projectId" -> projectId
+      ).as(scalar[Boolean].single)
+    }
+  }
+
+  def addMember(userId:String, projectId: Long, memberId: String) {
+    if (userId != memberId && isMember(userId, projectId)) {
+      DB.withConnection { implicit connection =>
+        SQL("insert into project_member (project_id, user_id) values ({projectId}, {memberId})").on(
+          "projectId" -> projectId,
+          "memberId" -> memberId
+        ).executeUpdate()
+      }
+    }
+  }
+
+  def removeMember(userId:String, projectId: Long, memberId: String) {
+    if (userId != memberId && isMember(userId, projectId)) {
+      DB.withConnection { implicit connection =>
+        SQL("delete from project_member where project_id = {projectId} and user_id = {memberId}").on(
+          "projectId" -> projectId,
+          "memberId" -> memberId
+        ).executeUpdate()
+      }
+    }
+  }
+
 }

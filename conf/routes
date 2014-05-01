@@ -27,3 +27,6 @@ GET     /non-authorized             securesocial.controllers.ProviderController.
 GET     /projects                   controllers.ProjectController.projects
 POST    /projects                   controllers.ProjectController.newProject
 POST    /projects/:id/delete        controllers.ProjectController.deleteProject(id: Long)
+
+# Twitter API
+GET     /followers                  controllers.Application.followers

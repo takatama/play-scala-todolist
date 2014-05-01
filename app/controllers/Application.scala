@@ -54,4 +54,22 @@ object Application extends Controller with securesocial.core.SecureSocial {
     }
   }
 
+  import play.api.libs.oauth.{RequestToken, OAuthCalculator}
+  import play.api.libs.ws.WS
+  import securesocial.core.SecureSocial
+  import scala.concurrent._
+  import ExecutionContext.Implicits.global
+
+  def followers = SecuredAction { implicit request => {
+      val oauthInfo = request.user.oAuth1Info.get
+      Async {
+        WS.url("https://api.twitter.com/1.1/followers/list.json").sign(
+          OAuthCalculator(
+            SecureSocial.serviceInfoFor(request.user).get.key,
+            RequestToken(oauthInfo.token, oauthInfo.secret)
+          )
+        ).get.map(result => Ok(result.json))
+      }
+    }
+  }
 }
