@@ -19,6 +19,11 @@ CREATE TABLE task (
   foreign key(project_id) references projects(id) on delete cascade
 );
 
+CREATE TABLE project_member (
+  project_id bigint not null,
+  user_id varchar(255) not null,
+  foreign key(project_id) references projects(id) on delete cascade
+);
 # --- !Downs
 
 DROP TABLE projects;
@@ -26,3 +31,5 @@ DROP SEQUENCE project_id_seq;
 
 DROP TABLE task;
 DROP SEQUENCE task_id_seq;
+
+drop table if exists project_member;
